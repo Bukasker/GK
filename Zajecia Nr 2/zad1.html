@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>CPSC 424, Lab 2, Exercise 1</title>
+    <style>
+      body {
+        background-color: #dddddd;
+      }
+
+      canvas {
+        background-color: white;
+        display: block;
+      }
+
+      #canvasholder {
+        border: 2px solid black;
+        float: left;
+        /* This makes the border exactly fit the canvas. */
+      }
+    </style>
+    <script>
+      var canvas; // The canvas element on which we will draw.
+      var graphics; // A 2D graphics context for drawing on the canvas.
+      var pixelSize; // The size of a pixel in the coordinate system; set up by
+      function draw() {
+        const ctx = document.getElementById("canvas").getContext("2d");
+
+        graphics.clearRect(0, 0, 600, 600);
+
+        // TODO: insert code to draw the image for Exercise 1!
+		  ctx.fillStyle = "black";
+		  graphics.fillOval(205, 205, 210, 210);
+        ctx.fillStyle = "yellow";
+          graphics.fillOval(205, 205, 200, 200);
+		  ctx.fillStyle = "black";
+          graphics.fillOval(100, 100, 150, 150);
+		  ctx.fillStyle = "white";
+		  graphics.fillOval(100, 100, 140, 140);
+
+        ctx.fillStyle = "white";
+		  graphics.fillOval(240, 210, 20, 20);
+		  graphics.fillOval(330, 210, 20, 20);
+
+        ctx.fillStyle = "black";
+		  graphics.fillOval(240, 210, 10, 10);
+		  graphics.fillOval(330, 210, 10, 10);
+        ctx.fillStyle = "white";
+        graphics.fillOval(238, 208, 2, 2);
+          graphics.fillOval(328, 208, 2, 2);
+
+        ctx.fillStyle = "black";
+        graphics.fillOval(275, 280, 50, 20);
+        ctx.fillStyle = "white";
+        graphics.fillRect(275, 285, 10, 10);
+        graphics.fillRect(264, 285, 10, 10);
+        ctx.fillStyle = "yellow";
+        graphics.fillOval(275, 265, 50, 20);
+         ctx.fillStyle = "black";
+		 graphics.fillOval(225, 275, 10, 10);
+          graphics.fillOval(323, 275, 10, 10);
+		  ctx.fillStyle = "yellow";
+		  graphics.fillOval(223, 270, 11,11);
+		  graphics.fillOval(325, 270, 11,11);
+      } 
+
+      function applyWindowToViewportTransformation(
+        left,
+        right,
+        bottom,
+        top,
+        preserveAspect
+      ) {
+        var displayAspect, windowAspect;
+        var excess;
+        var pixelwidth, pixelheight;
+        if (preserveAspect) {
+          // Adjust the limits to match the aspect ratio of the drawing area.
+          displayAspect = Math.abs(canvas.height / canvas.width);
+          windowAspect = Math.abs((top - bottom) / (right - left));
+          if (displayAspect > windowAspect) {
+            // Expand the viewport vertically.
+            excess = (top - bottom) * (displayAspect / windowAspect - 1);
+            top = top + excess / 2;
+            bottom = bottom - excess / 2;
+          } else if (displayAspect < windowAspect) {
+            // Expand the viewport vertically.
+            excess = (right - left) * (windowAspect / displayAspect - 1);
+            right = right + excess / 2;
+            left = left - excess / 2;
+          }
+        }
+        graphics.scale(
+          canvas.width / (right - left),
+          canvas.height / (bottom - top)
+        );
+        graphics.translate(-left, -top);
+        pixelwidth = Math.abs((right - left) / canvas.width);
+        pixelheight = Math.abs((bottom - top) / canvas.height);
+        pixelSize = Math.max(pixelwidth, pixelheight);
+      } // end of applyWindowToViewportTransformation()
+
+      function addGraphicsContextExtras(graphics) {
+        graphics.strokeLine = function (x1, y1, x2, y2) {
+          this.beginPath();
+          this.moveTo(x1, y1);
+          this.lineTo(x2, y2);
+          this.stroke();
+        };
+        graphics.fillCircle = function (x, y, r) {
+          this.beginPath();
+          this.arc(x, y, r, 0, 2 * Math.PI, false);
+          this.fill();
+        };
+        graphics.strokeCircle = function (x, y, radius) {
+          this.beginPath();
+          this.arc(x, y, radius, 0, 2 * Math.PI, false);
+          this.stroke();
+        };
+        graphics.fillPoly = function () {
+          if (arguments.length < 6) return;
+          this.beginPath();
+          this.moveTo(arguments[0], arguments[1]);
+          for (var i = 2; i + 1 < arguments.length; i = i + 2) {
+            this.lineTo(arguments[i], arguments[i + 1]);
+          }
+          this.closePath();
+          this.fill();
+        };
+        graphics.strokePoly = function () {
+          if (arguments.length < 4) return;
+          this.beginPath();
+          this.moveTo(arguments[0], arguments[1]);
+          for (var i = 2; i + 1 < arguments.length; i = i + 2) {
+            this.lineTo(arguments[i], arguments[i + 1]);
+          }
+          this.closePath();
+          this.stroke();
+        };
+        graphics.fillOval = function (x, y, horizontalRadius, verticalRadius) {
+          this.save();
+          this.translate(x, y);
+          this.scale(horizontalRadius, verticalRadius);
+          this.beginPath();
+          this.arc(0, 0, 1, 0, 2 * Math.PI, false);
+          this.restore();
+          this.fill();
+        };
+        graphics.strokeOval = function (
+          x,
+          y,
+          horizontalRadius,
+          verticalRadius
+        ) {
+          this.save();
+          this.translate(x, y);
+          this.scale(horizontalRadius, verticalRadius);
+          this.beginPath();
+          this.arc(0, 0, 1, 0, 2 * Math.PI, false);
+          this.restore();
+          this.stroke();
+        };
+        graphics.getRGB = function (x, y) {
+          var color = this.getImageData(x, y, 1, 1);
+          return color.data;
+        };
+      } // end of addGraphicsContextExtras()
+
+      function init() {
+        try {
+          canvas = document.getElementById("canvas");
+          graphics = canvas.getContext("2d");
+        } catch (e) {
+          document.getElementById("canvasholder").innerHTML =
+            "Canvas graphics is not supported.<br>" +
+            "An error occurred while initializing graphics.";
+        }
+        addGraphicsContextExtras(graphics);
+        draw(); // Call draw() to draw on the canvas.
+      }
+    </script>
+  </head>
+
+  <body onload="init()">
+    <!-- the onload attribute here is what calls the init() function -->
+
+    <h2>CS 424, Lab 2, Exercise 1</h2>
+
+    <noscript>
+      <!-- This message will be shown in the page if JavaScript is not available. -->
+      <p>JavaScript is required to use this page.</p>
+    </noscript>
+
+    <div id="canvasholder">
+      <canvas id="canvas" width="600" height="600">
+        <!-- This message is shown on the page if the browser doesn't support the canvas element. -->
+        Canvas not supported.
+      </canvas>
+    </div>
+  </body>
+</html>
